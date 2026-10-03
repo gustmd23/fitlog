@@ -1,0 +1,134 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>핏로그</title>
+  <meta name="theme-color" content="#1f6f5c">
+  <link rel="manifest" href="manifest.json">
+  <link rel="icon" href="icon-192.png">
+  <link rel="apple-touch-icon" href="icon-192.png">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="핏로그">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header class="top">
+    <h1>핏로그</h1>
+  </header>
+
+  <main>
+    <!-- ① 오늘 입력 -->
+    <section id="tab-input" class="tab active">
+      <div class="date-row">
+        <button class="icon-btn" id="prevDay" aria-label="전날">‹</button>
+        <input type="date" id="dateInput">
+        <button class="icon-btn" id="nextDay" aria-label="다음날">›</button>
+      </div>
+
+      <div class="card">
+        <h2>아침 공복 체중</h2>
+        <div class="row">
+          <input type="number" id="weightInput" inputmode="decimal" step="0.1" placeholder="예: 72.4">
+          <span class="unit">kg</span>
+          <button class="btn" id="saveWeight">저장</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2>식단 <span class="sum" id="kcalSum"></span></h2>
+        <div class="form-grid">
+          <select id="mealType">
+            <option>아침</option><option>점심</option><option>저녁</option><option>간식</option>
+          </select>
+          <input id="mealMenu" list="menuList" placeholder="메뉴 (예: 닭가슴살 샐러드)">
+          <input id="mealKcal" type="number" inputmode="numeric" placeholder="kcal">
+          <button class="btn" id="addMeal">추가</button>
+        </div>
+        <datalist id="menuList"></datalist>
+        <p class="hint">한 번 입력한 메뉴는 다음부터 목록에서 고르면 칼로리가 자동으로 채워져요.</p>
+        <div id="mealList"></div>
+      </div>
+
+      <div class="card">
+        <h2>웨이트 운동 <span class="sum" id="setSum"></span></h2>
+        <div class="form-grid workout">
+          <input id="exName" list="exList" placeholder="종목 (예: 스쿼트)">
+          <input id="exWeight" type="number" inputmode="decimal" step="0.5" placeholder="중량kg">
+          <input id="exReps" type="number" inputmode="numeric" placeholder="횟수">
+          <input id="exSets" type="number" inputmode="numeric" placeholder="세트">
+          <button class="btn" id="addEx">추가</button>
+        </div>
+        <datalist id="exList"></datalist>
+        <p class="hint">종목을 고르면 지난번 기록(중량·횟수·세트)이 미리 채워져요. 맨몸 운동은 중량을 비워 두세요.</p>
+        <div id="exListView"></div>
+      </div>
+    </section>
+
+    <!-- ② 기록 표 -->
+    <section id="tab-table" class="tab">
+      <div class="card">
+        <h2>날짜별 기록</h2>
+        <p class="hint">행을 누르면 그 날짜를 수정할 수 있어요.</p>
+        <div class="table-wrap"><table id="logTable"></table></div>
+      </div>
+    </section>
+
+    <!-- ③ 그래프 -->
+    <section id="tab-chart" class="tab">
+      <div class="seg" id="rangeSeg">
+        <button data-days="14">2주</button>
+        <button data-days="30" class="on">1개월</button>
+        <button data-days="90">3개월</button>
+        <button data-days="0">전체</button>
+      </div>
+      <div class="card">
+        <h2>체중 추이</h2>
+        <p class="hint">점선은 7일 이동평균이에요. 하루하루 출렁임보다 이 선의 방향을 보세요.</p>
+        <div class="chart-box"><canvas id="weightChart"></canvas></div>
+      </div>
+      <div class="card">
+        <h2>일별 섭취 칼로리</h2>
+        <div class="chart-box"><canvas id="kcalChart"></canvas></div>
+      </div>
+      <div class="card">
+        <h2>종목별 진척</h2>
+        <select id="exChartSelect"></select>
+        <div class="chart-box"><canvas id="exChart"></canvas></div>
+      </div>
+    </section>
+
+    <!-- ④ 설정·백업 -->
+    <section id="tab-settings" class="tab">
+      <div class="card">
+        <h2>백업</h2>
+        <p class="hint">데이터는 이 기기의 브라우저 안에만 저장돼요. 일주일에 한 번쯤 백업 파일을 내려받아 두세요.</p>
+        <div class="stack">
+          <button class="btn" id="exportJson">백업 파일 내려받기 (.json)</button>
+          <label class="btn ghost file-btn">백업 파일 불러오기
+            <input type="file" id="importJson" accept=".json,application/json" hidden>
+          </label>
+          <button class="btn ghost" id="exportCsv">엑셀용 CSV 내려받기</button>
+        </div>
+      </div>
+      <div class="card">
+        <h2>초기화</h2>
+        <button class="btn danger" id="resetAll">모든 기록 삭제</button>
+      </div>
+      <p class="hint center">핏로그 v1</p>
+    </section>
+  </main>
+
+  <nav class="tabs">
+    <button data-tab="input" class="on">✏️<span>입력</span></button>
+    <button data-tab="table">📋<span>기록</span></button>
+    <button data-tab="chart">📈<span>그래프</span></button>
+    <button data-tab="settings">⚙️<span>백업</span></button>
+  </nav>
+
+  <div id="toast"></div>
+
+  <script src="chart.umd.min.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
